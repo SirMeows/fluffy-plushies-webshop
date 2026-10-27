@@ -1,64 +1,76 @@
-# KEA 2026 Security for Web Developers - Fluffy Plushies Webshop
+# Fluffy Plushies Webshop
 
-[![Security Scans](https://github.com/WebSecDetectives/fluffy-plushies-webshop-backend/actions/workflows/security-scans.yml/badge.svg)](https://github.com/WebSecDetectives/fluffy-plushies-webshop-backend/actions/workflows/security-scans.yml)
+A webshop project focused on authentication, role-based access control, and security testing. Users can browse products and write reviews. Merchants manage their own products and images, while administrators manage users and products. Products can be public or private.
 
-## How to run the project
+Built with Angular 20, Java 24, Spring Boot 4, MySQL, RabbitMQ, and Docker Compose.
 
-The application and its dependencies are dockerized, so no local database or service installation is needed.
+## Project structure
 
-1. Create a local `.env` file in the project root, using `dotenv-template` as a reference, and fill in the values (including the demo account passwords).
-2. Start the system with Docker Compose from the project root:
+| Directory | Purpose |
+| --- | --- |
+| [Webshop](Webshop) | Angular frontend |
+| [IdentityService](IdentityService) | Registration, authentication, and user management |
+| [InventoryService](InventoryService) | Products, reviews, image uploads, and access control |
+
+`OrderService` (.NET) and `EmailService` (Node.js/TypeScript) are retained from the earlier project. They are outside the current security-focused application and do not start with the default Compose configuration.
+
+## Run locally
+
+Requirements: Docker with Docker Compose.
+
+1. Copy [dotenv-template](dotenv-template) to `.env` in the repository root and fill in the values, including database credentials, the JWT secret, and demo account passwords.
+2. From the repository root, run:
 
    ```bash
    docker compose up -d
    ```
 
-3. Open the app at <http://localhost>.
+3. Open <http://localhost>.
 
-To do a clean restart including a database reset:
+| Service | URL |
+| --- | --- |
+| Webshop | <http://localhost> |
+| IdentityService | <http://localhost:8081/identity> |
+| InventoryService | <http://localhost:8082/inventory> |
+
+For frontend development outside Docker, see [Webshop/README.md](Webshop/README.md).
+
+### Demo accounts
+
+Docker Compose enables the `demo` Spring profile, which seeds these accounts. Use the passwords configured in `.env`.
+
+| Username | Role | Password variable |
+| --- | --- | --- |
+| `admin` | ADMIN | `IDENTITY_ADMIN_PASSWORD` |
+| `merchant` | MERCHANT | `IDENTITY_MERCHANT_PASSWORD` |
+| `user` | USER | `IDENTITY_USER_PASSWORD` |
+
+Demo deployment: <https://shop.starlords.eu/>. This was provided for project evaluation, so continued availability is not guaranteed.
+
+### Reset local data
+
+The following removes the Compose volumes and their stored data, then rebuilds and starts the application:
 
 ```bash
 docker compose down -v
 docker compose up --build -d
 ```
 
-### Live demo
+## Tests and security documentation
 
-A hosted instance is available at <https://shop.starlords.eu/>. Note: it is online for a limited time only and may be taken down after evaluation.
+- [Identity API tests](IdentityService/src/test/java/com/dlshomies/fluffyplushies/api/UserControllerApiTest.java)
+- [Image-validation tests](InventoryService/src/test/java/com/sirmeows/fluffyinventoryservice/util/ImageSanitizationUtilTest.java)
+- [Access-control matrix](Documentation/ACCESS_CONTROL_MATRIX.md)
+- [Manual security checks](Documentation/ManualSecurityChecks.pdf)
+- [UI test flows](Documentation/UI_TEST_FLOWS.md)
 
-### Services
+### Postman
 
-| Service | URL |
-| --- | --- |
-| Webshop (frontend) | <http://localhost> |
-| IdentityService | <http://localhost:8081/identity> |
-| InventoryService | <http://localhost:8082/inventory> |
-
-### Demo accounts
-
-The `demo` Spring profile is enabled by default in Docker Compose and seeds three accounts. Log in with these usernames and the passwords you set in `.env`:
-
-| Username | Role | Password (`.env`) |
-| --- | --- | --- |
-| `admin` | ADMIN | `IDENTITY_ADMIN_PASSWORD` |
-| `merchant` | MERCHANT | `IDENTITY_MERCHANT_PASSWORD` |
-| `user` | USER | `IDENTITY_USER_PASSWORD` |
-
-## Environment
-
-See `dotenv-template` in the project root for the required environment variables.
-
-## API testing with Postman
-
-A Postman collection is provided at `Postman/Fluffy-Plushies-Webshop.postman_collection.json`. It covers authentication, registration, role-based access control, item and review CRUD, image upload, and SQL/command injection checks.
+The [API collection](Postman/Fluffy-Plushies-Webshop.postman_collection.json) covers authentication, registration, role-based access, product and review operations, image uploads, and SQL/command injection checks.
 
 1. Import the collection into Postman.
-2. The password variables are committed blank for security. Set these three collection variables to the same values used in `.env`:
+2. Set `adminPassword`, `merchantPassword`, and `userPassword` to the corresponding demo account passwords from `.env`.
+3. For upload requests, select the matching files from [Postman/files](Postman/files).
+4. With the stack running, run the collection from top to bottom. The Auth folder sets the tokens needed by later requests. Service URLs default to `localhost:8081` and `localhost:8082`.
 
-   | Collection variable | Set to (`.env`) |
-   | --- | --- |
-   | `adminPassword` | `IDENTITY_ADMIN_PASSWORD` |
-   | `merchantPassword` | `IDENTITY_MERCHANT_PASSWORD` |
-   | `userPassword` | `IDENTITY_USER_PASSWORD` |
-
-3. With the stack running locally, run the collection top to bottom (or use the Collection Runner). The login requests set the auth tokens automatically, so later requests are authorized. The base URLs default to the local services (`localhost:8081` and `localhost:8082`).
+See [Postman/README.md](Postman/README.md) for credential handling.
