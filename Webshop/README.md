@@ -1,59 +1,33 @@
-# FluffyPlushiesWebApp
+# Fluffy Plushies Webshop Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.0.2.
+Angular 20 and TypeScript frontend for the [Fluffy Plushies Webshop](../README.md). It provides registration and login, product browsing, reviews, and role-based product and user management.
 
-## Development server
+## Run the full application
 
-To start a local development server, run:
+Follow the [Docker Compose setup](../README.md#run-locally) in the main README. It builds the frontend and starts the required backend services.
 
-```bash
-ng serve
-```
+## Frontend development
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Requirements: Node.js 22.12 or newer within the 22.x release line, npm, and the backend stack running as described in the main README.
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+From the `Webshop` directory:
 
 ```bash
-ng generate component component-name
+npm ci
+npm start
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Open <http://localhost:4200>. The development server reloads when source files change.
+
+[proxy.conf.json](proxy.conf.json) forwards `/identity` to `http://localhost:8081` and `/inventory` to `http://localhost:8082`. The frontend uses these relative API paths in [environment.ts](src/environments/environment.ts).
+
+## Build and tests
+
+Run these commands from `Webshop`:
 
 ```bash
-ng generate --help
+npm run build
+npm test
 ```
 
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+The production build is written to `dist/fluffy_plushies_web_app/browser`. Unit tests use Jasmine and Karma with a Chrome browser. See the [UI test flows](../Documentation/UI_TEST_FLOWS.md) for manual checks.
